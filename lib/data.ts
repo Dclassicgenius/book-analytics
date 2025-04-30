@@ -26,7 +26,9 @@ export async function getIncomeData(
   }
 
   const response = await fetch(
-    `http://localhost:3000/api/income?${params.toString()}`,
+    process.env.NODE_ENV === "development"
+      ? `http://localhost:3000/api/income?${params.toString()}`
+      : `${process.env.API_BASE_URL}/api/income?${params.toString()}`,
     { cache: "no-store" }
   );
 
