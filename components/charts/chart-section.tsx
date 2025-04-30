@@ -21,11 +21,7 @@ import {
   ChartLegendContent,
 } from "@/components/ui/chart";
 import { DailyIncome } from "@/lib/data";
-import {
-  filterDataByTimeRange,
-  formatTooltipValue,
-  getTimeRangeText,
-} from "@/lib/utils";
+import { formatTooltipValue, getTimeRangeText } from "@/lib/utils";
 import { CustomTooltip } from "./custom-tooltip";
 import { StatsSummary } from "./stats-summary";
 
@@ -62,18 +58,8 @@ export default function ChartSection({
     : subDays(maxDate, 7);
   const endDate = initialEndDate ? parseISO(initialEndDate) : maxDate;
 
-  const filteredData = filterDataByTimeRange(
-    data,
-    selectedTab,
-    maxDate,
-    startDate,
-    endDate
-  );
-
   const useBarChart =
-    selectedTab === "today" ||
-    selectedTab === "yesterday" ||
-    filteredData.length <= 3;
+    selectedTab === "today" || selectedTab === "yesterday" || data.length <= 3;
 
   return (
     <Card className="border-0 shadow-none">
@@ -82,16 +68,16 @@ export default function ChartSection({
           {getTimeRangeText(selectedTab, maxDate, startDate, endDate)}
         </h3>
 
-        <StatsSummary data={filteredData} />
+        <StatsSummary data={data} />
 
         <ChartContainer
           config={chartConfig}
           className="aspect-auto h-[400px] w-full"
         >
-          {filteredData.length > 0 ? (
+          {data.length > 0 ? (
             useBarChart ? (
               <BarChart
-                data={filteredData}
+                data={data}
                 margin={{ top: 10, right: 30, left: 20, bottom: 20 }}
               >
                 <CartesianGrid
@@ -158,7 +144,7 @@ export default function ChartSection({
               </BarChart>
             ) : (
               <AreaChart
-                data={filteredData}
+                data={data}
                 margin={{ top: 10, right: 30, left: 20, bottom: 20 }}
               >
                 <defs>

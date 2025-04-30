@@ -31,7 +31,7 @@ export default function Home() {
           </CardContent>
           <CardFooter>
             <Link
-              href="/statistics"
+              href="/statistics?tab=month"
               className={cn(buttonVariants({ variant: "default" }))}
             >
               Перейти к статистике

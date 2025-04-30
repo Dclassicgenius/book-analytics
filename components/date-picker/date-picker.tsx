@@ -7,15 +7,19 @@ import { Label } from "../ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useState } from "react";
+import { DATA_MAX_DATE, DATA_MIN_DATE } from "@/lib/data";
 
 export default function DatePicker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const minDate = new Date(2024, 0, 1);
-  const maxDate = new Date(2024, 11, 31);
+  const [startDateOpen, setStartDateOpen] = useState(false);
+  const [endDateOpen, setEndDateOpen] = useState(false);
+
+  const minDate = new Date(DATA_MIN_DATE);
+  const maxDate = new Date(DATA_MAX_DATE);
 
   const referenceDate = maxDate;
 
@@ -25,29 +29,15 @@ export default function DatePicker() {
   const startDateString = searchParams.get("startDate") || defaultStartDate;
   const endDateString = searchParams.get("endDate") || defaultEndDate;
 
-  useEffect(() => {
-    if (!searchParams.has("startDate") || !searchParams.has("endDate")) {
-      const params = new URLSearchParams(searchParams);
-
-      if (!searchParams.has("startDate")) {
-        params.set("startDate", defaultStartDate);
-      }
-
-      if (!searchParams.has("endDate")) {
-        params.set("endDate", defaultEndDate);
-      }
-
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-    }
-  }, [pathname, router, searchParams, defaultStartDate, defaultEndDate]);
-
   const handleDateChange = (date: Date | undefined, type: "start" | "end") => {
     const params = new URLSearchParams(searchParams);
 
     if (date && type === "start") {
       params.set("startDate", format(date, "yyyy-MM-dd"));
+      setStartDateOpen(false);
     } else if (date && type === "end") {
       params.set("endDate", format(date, "yyyy-MM-dd"));
+      setEndDateOpen(false);
     } else {
       params.delete(type === "start" ? "startDate" : "endDate");
     }
@@ -59,7 +49,7 @@ export default function DatePicker() {
     <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end">
       <div className="grid gap-2">
         <Label htmlFor="start-date">Начальная дата</Label>
-        <Popover>
+        <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
           <PopoverTrigger asChild>
             <Button
               id="start-date"
@@ -80,6 +70,7 @@ export default function DatePicker() {
           <PopoverContent className="w-auto p-0">
             <Calendar
               mode="single"
+              defaultMonth={parseISO(startDateString)}
               selected={parseISO(startDateString)}
               onSelect={(date) => handleDateChange(date, "start")}
               initialFocus
@@ -96,7 +87,7 @@ export default function DatePicker() {
       </div>
       <div className="grid gap-2">
         <Label htmlFor="end-date">Конечная дата</Label>
-        <Popover>
+        <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
           <PopoverTrigger asChild>
             <Button
               id="end-date"
@@ -117,6 +108,7 @@ export default function DatePicker() {
           <PopoverContent className="w-auto p-0">
             <Calendar
               mode="single"
+              defaultMonth={parseISO(endDateString)}
               selected={parseISO(endDateString)}
               onSelect={(date) => handleDateChange(date, "end")}
               initialFocus

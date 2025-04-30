@@ -1,14 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
-import {
-  subDays,
-  format,
-  startOfDay,
-  endOfDay,
-  isWithinInterval,
-  setDefaultOptions,
-} from "date-fns";
+import { subDays, format, setDefaultOptions } from "date-fns";
 import { twMerge } from "tailwind-merge";
-import { DailyIncome } from "./data";
 import { ru } from "date-fns/locale";
 
 setDefaultOptions({ locale: ru });
@@ -76,46 +68,4 @@ export const calculateChange = (
   const percentage = first === 0 ? 0 : (change / first) * 100;
 
   return { value: change, percentage };
-};
-
-export const filterDataByTimeRange = (
-  data: DailyIncome[],
-  selectedTab: string,
-  referenceDate: Date,
-  startDate?: Date,
-  endDate?: Date
-): DailyIncome[] => {
-  let start: Date;
-  let end: Date;
-
-  switch (selectedTab) {
-    case "today":
-      start = startOfDay(referenceDate);
-      end = endOfDay(referenceDate);
-      break;
-    case "yesterday":
-      start = startOfDay(subDays(referenceDate, 1));
-      end = endOfDay(subDays(referenceDate, 1));
-      break;
-    case "month":
-      start = subDays(referenceDate, 30);
-      end = referenceDate;
-      break;
-    case "year":
-      start = subDays(referenceDate, 365);
-      end = referenceDate;
-      break;
-    case "custom":
-      start = startDate ? startOfDay(startDate) : subDays(referenceDate, 7);
-      end = endDate ? endOfDay(endDate) : referenceDate;
-      break;
-    default:
-      start = subDays(referenceDate, 30);
-      end = referenceDate;
-  }
-
-  return data.filter((item) => {
-    const date = new Date(item.date);
-    return isWithinInterval(date, { start, end });
-  });
 };

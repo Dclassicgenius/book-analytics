@@ -3,50 +3,41 @@ export type DailyIncome = {
   income: number;
 };
 
-const seededRandom = (seed: number) => {
-  const x = Math.sin(seed) * 10000;
-  return x - Math.floor(x);
-};
-
-const generateDailyIncome = (date: Date): number => {
-  const daySeed = date.getDate() + date.getMonth() * 31;
-
-  let baseIncome = 15000 + seededRandom(daySeed) * 10000;
-
-  if (date.getDay() === 0 || date.getDay() === 6) {
-    baseIncome *= 1.4 + seededRandom(daySeed + 1000) * 0.2;
-  }
-
-  const month = date.getMonth();
-  if (month === 8) {
-    baseIncome *= 1.5;
-  } else if (month === 11) {
-    baseIncome *= 1.7;
-  } else if (month === 6 || month === 7) {
-    baseIncome *= 1.3;
-  } else if (month === 1) {
-    baseIncome *= 0.8;
-  }
-
-  return Math.round(baseIncome * (0.9 + seededRandom(daySeed + 2000) * 0.2));
-};
+export const DATA_MIN_DATE = new Date(2024, 0, 1); // Jan 1, 2024
+export const DATA_MAX_DATE = new Date(2024, 11, 31); // Dec 31, 2024
 
 export async function getIncomeData(
-  startDate: Date = new Date(2024, 0, 1),
-  endDate: Date = new Date(2024, 11, 31)
+  period?: string,
+  startDateStr?: string,
+  endDateStr?: string
 ): Promise<DailyIncome[]> {
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  const params = new URLSearchParams();
 
-  const data: DailyIncome[] = [];
-  const currentDate = new Date(startDate);
-
-  while (currentDate <= endDate) {
-    data.push({
-      date: new Date(currentDate),
-      income: generateDailyIncome(currentDate),
-    });
-    currentDate.setDate(currentDate.getDate() + 1);
+  if (period) {
+    params.set("period", period);
   }
 
-  return data;
+  if (startDateStr) {
+    params.set("startDate", startDateStr);
+  }
+
+  if (endDateStr) {
+    params.set("endDate", endDateStr);
+  }
+
+  const response = await fetch(
+    `http://localhost:3000/api/income?${params.toString()}`,
+    { cache: "no-store" }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch income data");
+  }
+
+  const data = await response.json();
+
+  return data.map((item: { date: string; income: number }) => ({
+    ...item,
+    date: new Date(item.date),
+  }));
 }

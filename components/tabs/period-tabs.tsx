@@ -3,6 +3,8 @@
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
 import { useEffect } from "react";
+import { DATA_MAX_DATE } from "@/lib/data";
+import { format, subDays } from "date-fns";
 
 const tabs = [
   { value: "today", label: "Сегодня" },
@@ -31,7 +33,10 @@ export default function PeriodTabs() {
     const params = new URLSearchParams(searchParams);
     params.set("tab", value);
 
-    if (value !== "custom") {
+    if (value === "custom") {
+      params.set("startDate", format(subDays(DATA_MAX_DATE, 7), "yyyy-MM-dd"));
+      params.set("endDate", format(DATA_MAX_DATE, "yyyy-MM-dd"));
+    } else {
       params.delete("startDate");
       params.delete("endDate");
     }
